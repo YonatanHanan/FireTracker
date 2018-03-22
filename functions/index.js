@@ -1,5 +1,5 @@
 const functions = require('firebase-functions');
-const bencode = require('bencode').encode;
+const bencode = require('bencode');
 
 // The Firebase Admin SDK to access the Firebase Realtime Database.
 const admin = require('firebase-admin');
