@@ -9,9 +9,13 @@
         "logs": "firebase functions:log"
     },
     "dependencies": {
+        "@google-cloud/storage": "^1.6.0",
         "bencode": "^2.0.0",
-        "firebase-admin": "~5.8.1",
-        "firebase-functions": "^0.8.1"
+        "child-process-promise": "^2.2.1",
+        "firebase-admin": "^5.10.0",
+        "firebase-functions": "^0.8.1",
+        "parse-torrent": "^5.8.3",
+        "request": "^2.85.0"
     },
     "private": true
 }

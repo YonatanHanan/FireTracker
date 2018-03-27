@@ -1,0 +1,25 @@
+.TorrentForm {
+    color: white;
+}
+
+input,
+select,
+textarea {
+    color: black;
+}
+
+.button-success {
+    background: white;
+    /* this is a green */
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+}
+
+.center>button {
+    padding: 20px;
+    font-size: 20px;
+    font-weight: bold;
+}

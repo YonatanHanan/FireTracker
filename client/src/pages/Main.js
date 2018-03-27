@@ -5,9 +5,9 @@ class Main extends Component {
     render() {
         return (
             <div className="Main">
-                <div class="searchboxwrapper">
+                <div className="searchboxwrapper">
                     <input id="filter" type="text" placeholder="Search"/>
-                    <i id="filtersubmit" class="fa fa-search"></i>
+                    <i id="filtersubmit" className="fa fa-search"></i>
                 </div>
             </div>
         );

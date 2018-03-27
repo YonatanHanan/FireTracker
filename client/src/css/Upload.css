@@ -1,0 +1,37 @@
+.Upload {
+    background: linear-gradient(to right, #0D7BE4, #0e80b0);
+    display: flex;
+    justify-content: center;
+}
+
+.wrapper {
+    width: 90%;
+}
+
+.Title {
+    font-family: Roboto;
+}
+
+.alert-primary {
+    color: #004085;
+    background-color: #cce5ff;
+    border-color: #b8daff;
+}
+
+.alert {
+    width: fit-content;
+    display: inline-block;
+    position: relative;
+    padding: .75rem 1.25rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+}
+
+.uploadLabel {
+    margin-left: 20px;
+    background-color: white;
+    color: black;
+    padding: .75rem 1.25rem;
+    border-radius: 4px;
+    cursor: pointer;
+}

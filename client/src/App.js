@@ -6,7 +6,9 @@ import icon from "./img/icon.png";
 
 import './App.css';
 import Main from './pages/Main';
+import Upload from './pages/Upload';
 import TopTen from './pages/TopTen';
+import Torrent from './pages/Torrent';
 
 class App extends Component {
   render() {
@@ -32,6 +34,8 @@ class App extends Component {
           <Switch>
             <Route path="/" exact component={Main}/>
             <Route path="/TopTen" exact component={TopTen}/>
+            <Route path="/Upload" exact component={Upload}/>
+            <Route path="/torrent/" component={Torrent}/>
           </Switch>
           </div>
       </BrowserRouter>
