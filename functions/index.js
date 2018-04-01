@@ -12,20 +12,6 @@ var request = require('request');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
-exports.imdbData = functions
-    .https
-    .onRequest((req, res) => {
-
-        let url = 'http://www.omdbapi.com/?i=' + req
-            .path
-            .split('/')[1] + '&apikey=5424b8d1';
-        console.log(url);
-
-        request(url, function (error, response, body) {
-            res.json(body);
-        });
-    });
-
 exports.announce = functions
     .https
     .onRequest((req, res) => {

@@ -1,6 +1,9 @@
 import React, {Component} from 'react';
 import '../css/TorrentForm.css';
 import {fire} from '../firebase.js';
+import axios from 'axios';
+
+import bytesToSize from '../components/bytesToSize';
 
 class TorrentForm extends Component {
 
@@ -19,6 +22,10 @@ class TorrentForm extends Component {
             .imdbTitleChanged
             .bind(this);
 
+        this.trailerChanged = this
+            .trailerChanged
+            .bind(this);
+
         this.descriptionChanged = this
             .descriptionChanged
             .bind(this);
@@ -27,13 +34,20 @@ class TorrentForm extends Component {
             category: "Movie",
             isMovieOrShow: true,
             isGame: false,
+            isMusic: false,
+            isMiscellaneous: false,
             imdbTitle: "",
-            description: ""
+            description: "",
+            trailer: ""
         };
     }
 
     imdbTitleChanged(e) {
         this.setState({imdbTitle: e.target.value});
+    }
+
+    trailerChanged(e) {
+        this.setState({trailer: e.target.value});
     }
 
     descriptionChanged(e) {
@@ -42,34 +56,49 @@ class TorrentForm extends Component {
 
     saveTorrent(e) {
         e.preventDefault();
-        fire
-            .database()
-            .ref('torrents/' + this.props.torrent.infoHash)
-            .update(this.state);
-        console.log("Saved");
-        this.props.history.push('/torrent/' + this.props.torrent.infoHash);
+        if (this.state.isMovieOrShow) {
+            axios
+                .get('http://www.omdbapi.com/?i=' + this.state.imdbTitle + '&apikey=5424b8d1')
+                .then(response => {
+                    console.log(response.data);
+                    this.setState({apiData: response.data, loaded: true});
+                    fire
+                        .database()
+                        .ref('torrents/' + this.props.torrent.infoHash)
+                        .update(this.state);
+                    console.log("Saved");
+                    this
+                        .props
+                        .history
+                        .push('/torrent/' + this.props.torrent.infoHash);
+                });
+        } else {
+            fire
+                .database()
+                .ref('torrents/' + this.props.torrent.infoHash)
+                .update(this.state);
+            console.log("Saved");
+            this
+                .props
+                .history
+                .push('/torrent/' + this.props.torrent.infoHash);
+        }
     }
 
     categorySelected(event) {
         const categoryName = event.target.value;
-        this.setState({category: event.target.value, isMovieOrShow: false, isGame: false});
+        this.setState({category: event.target.value, isMovieOrShow: false, isGame: false, isMusic: false, isMiscellaneous: false});
 
         if (categoryName === "Movie" || categoryName === "TV Show") {
             this.setState({isMovieOrShow: true});
         } else if (categoryName === "Game") {
             this.setState({isGame: true});
+        } else if (categoryName === "Music") {
+            this.setState({isMusic: true});
+        } else if (categoryName === "Miscellaneous") {
+            this.setState({isMiscellaneous: true});
         }
     }
-
-    bytesToSize(bytes) {
-        let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        if (bytes === 0) 
-            return 'n/a';
-        let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-        if (i == 0) 
-            return bytes + ' ' + sizes[i];
-        return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
-    };
     render() {
         /*
             http://www.omdbapi.com/?i=tt3896198&apikey=5424b8d1
@@ -92,7 +121,7 @@ class TorrentForm extends Component {
                             <label>Size</label>
                             <input
                                 type="text"
-                                value={this.bytesToSize(this.props.torrent.length) + " in "}
+                                value={bytesToSize(this.props.torrent.length) + " in "}
                                 readOnly/>
                         </div>
                         <div className="pure-control-group">
@@ -107,16 +136,27 @@ class TorrentForm extends Component {
                         </div>
 
                         {this.state.isMovieOrShow
-                            ? <div className="pure-control-group">
-                                    <label htmlFor="IMDB">IMDB</label>
-                                    <input
-                                        id="IMDB"
-                                        type="text"
-                                        className="pure-input-1-3"
-                                        placeholder="Enter IMDB title (tt3896198)"
-                                        onChange={this.imdbTitleChanged}/>
-                                    <span>
-                                        Information such as Plot, Cover Image, Actors will be pulled automatically</span>
+                            ? <div>
+                                    <div className="pure-control-group">
+                                        <label htmlFor="IMDB">IMDB</label>
+                                        <input
+                                            id="IMDB"
+                                            type="text"
+                                            className="pure-input-1-3"
+                                            placeholder="Enter IMDB title (tt3896198)"
+                                            onChange={this.imdbTitleChanged}/>
+                                        <span>
+                                            Information such as Plot, Cover Image, Actors will be pulled automatically</span>
+                                    </div>
+                                    <div className="pure-control-group">
+                                        <label htmlFor="trailer">Trailer</label>
+                                        <input
+                                            id="Trailer"
+                                            type="text"
+                                            className="pure-input-1-3"
+                                            placeholder="Enter YouTube trailer link"
+                                            onChange={this.trailerChanged}/>
+                                    </div>
                                 </div>
                             : null}
 
@@ -141,7 +181,9 @@ class TorrentForm extends Component {
                                 onChange={this.descriptionChanged}></textarea>
                         </div>
                         <div className="center">
-                            <button className="button-success pure-button" onClick={(e) => this.saveTorrent(e)}>Upload!</button>
+                            <button
+                                className="button-success pure-button"
+                                onClick={(e) => this.saveTorrent(e)}>Upload!</button>
                         </div>
                     </fieldset>
                 </form>

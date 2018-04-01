@@ -1,9 +1,24 @@
 import React, {Component} from 'react';
 import '../css/Torrent.css';
-import {fire} from '../firebase.js';
-import axios from 'axios';
+import {fire, storage} from '../firebase.js';
 
+import MovieShow from '../components/MovieShow';
 class Torrent extends Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            torrent: {},
+            apiData: {},
+            loaded: false,
+            downloadLink: ""
+        };
+
+        this.downloadTorrent = this
+            .downloadTorrent
+            .bind(this);
+    }
     componentDidMount() {
         let torrentRef = fire
             .database()
@@ -12,13 +27,21 @@ class Torrent extends Component {
         torrentRef.on('value', (snapshot) => {
             let torrent = snapshot.val();
             console.log(torrent);
-            this.setState({torrent: torrent});
-            if (torrent.isMovieOrShow) {
-                axios
-                    .get('https://us-central1-bt-fire-tracker.cloudfunctions.net/imdbData/' + torrent.imdbTitle)
-                    .then(response => this.setState({apiData: response.data}));
-            }
+            this.setState({torrent: torrent, loaded: true});
         }).bind(this);
+
+    }
+
+    downloadTorrent(fileName) {
+        storage
+            .child("torrents/" + fileName)
+            .getDownloadURL()
+            .then(function (url) {
+                window.location = url;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
     }
 
     render() {
@@ -29,8 +52,16 @@ class Torrent extends Component {
         */
         return (
             <div className="Torrent">
-
-                as
+                {this.state.loaded
+                    ? <div>
+                            {this.state.torrent.isMovieOrShow
+                                ? <MovieShow data={this.state.torrent}/>
+                                : null}
+                            {this.state.torrent.isMovieOrShow || this.state.torrent.isGame
+                                ? <MovieShow data={this.state.torrent}/>
+                                : null}
+                        </div>
+                    : null}
             </div>
         );
     }

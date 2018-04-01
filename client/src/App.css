@@ -19,3 +19,8 @@
     font-family: Roboto;
     src: url('./fonts/Roboto-Medium.ttf');
 }
+
+@font-face {
+    font-family: BEBAS;
+    src: url('./fonts/BEBAS.ttf');
+}

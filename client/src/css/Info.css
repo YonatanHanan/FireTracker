@@ -1,0 +1,9 @@
+.Info {
+    display: flex;
+    color: white;
+}
+
+.Info>ul>li {
+    list-style: none;
+    padding-bottom: 10px;
+}

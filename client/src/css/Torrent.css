@@ -1,0 +1,17 @@
+.Torrent {
+    background: linear-gradient(to right, #0D7BE4, #0e80b0);
+    display: flex;
+    justify-content: center;
+    overflow: auto;
+}
+
+.download {
+    width: 100%;
+    display: block;
+    padding: 20px;
+    text-align: center;
+    background-color: #1E3146;
+    color: white;
+    border: none;
+    font-weight: bold;
+}

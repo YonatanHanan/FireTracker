@@ -9,3 +9,4 @@ const config = {
 
 export const fire = firebase.initializeApp(config);
 export const ref = firebase.database().ref();
+export const storage = firebase.storage().ref();
