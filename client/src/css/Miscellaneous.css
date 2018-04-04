@@ -45,3 +45,21 @@
     border: none;
     font-weight: bold;
 }
+
+.peers {
+    display: flex;
+    color: white;
+    justify-content: center;
+    width: 300px;
+    background-color: #2e4f74;
+}
+
+.peers>ul {
+    padding-left: 0;
+    padding-right: 5px;
+}
+
+.peers>ul>li {
+    list-style: none;
+    padding-bottom: 10px;
+}

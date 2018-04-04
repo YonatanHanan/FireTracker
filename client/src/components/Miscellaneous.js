@@ -12,7 +12,9 @@ class Miscellaneous extends Component {
             torrent: {},
             apiData: {},
             loaded: false,
-            downloadLink: ""
+            downloadLink: "",
+            up : 0,
+            down : 0
         };
 
         this.downloadTorrent = this
@@ -31,6 +33,21 @@ class Miscellaneous extends Component {
             });
     }
 
+    componentDidMount() {
+        let up = 0;
+        let down = 0;
+        Object
+            .values(this.props.data.clients)
+            .forEach(peer => {
+                if (peer === "Seeder") {
+                    up++;
+                } else if (peer === "Downloader") {
+                    down++;
+                }
+            });
+            this.setState({up : up, down : down});
+    }
+
     render() {
         return (
             <div className="Miscellaneous">
@@ -45,6 +62,24 @@ class Miscellaneous extends Component {
                             alt={this.props.data.name}
                             className="poster"/>
                         <button onClick={this.downloadTorrent} className="download">DOWNLOAD {bytesToSize(this.props.data.length)}</button>
+                        <div className="peers">
+                            <ul>
+                                <li>
+                                    Seeders
+                                </li>
+                                <li>
+                                    Leechers 
+                                </li>
+                            </ul>
+                            <ul>
+                                <li>
+                                <i className="fas fa-arrow-up"></i> {this.state.up}
+                                </li>
+                                <li>
+                                <i className="fas fa-arrow-down"></i> {this.state.down}
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                     <div className="plot">
                         <span className="plot-text">

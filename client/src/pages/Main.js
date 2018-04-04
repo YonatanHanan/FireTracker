@@ -14,11 +14,11 @@ class Main extends Component {
         };
 
         this.type = {
-            "Movie" : "fas fa-video",
-            "TV Show" : "fas fa-tv",
-            "Games" : "fas fa-gamepad",
-            "Music" : "fas fa-music",
-            "Miscellaneous" : "fas fa-coffee"
+            "Movie": "fas fa-video",
+            "TV Show": "fas fa-tv",
+            "Games": "fas fa-gamepad",
+            "Music": "fas fa-music",
+            "Miscellaneous": "fas fa-coffee"
         };
 
         this.downloadTorrent = this
@@ -51,8 +51,26 @@ class Main extends Component {
             Object
                 .keys(torrentsObj)
                 .forEach(function (key) {
+                    let down = 0;
+                    let up = 0;
+                    if (torrentsObj[key].clients) {
+                        Object
+                            .values(torrentsObj[key].clients)
+                            .forEach(peer => {
+                                if (peer === "Seeder") {
+                                    up++;
+                                } else if (peer === "Downloader") {
+                                    down++;
+                                }
+                            });
+                        torrentsObj[key]["up"] = up;
+                        torrentsObj[key]["down"] = down;
+                    }else{
+                        torrentsObj[key]["up"] = 0;
+                        torrentsObj[key]["down"] = 0;
+                    }
+
                     torrents.push(torrentsObj[key]);
-                    console.log(torrentsObj[key]);
                 });
 
             this.setState({torrents: torrents, loaded: true});
@@ -65,35 +83,51 @@ class Main extends Component {
             <div className="Main">
                 <div className="searchboxwrapper">asd</div>
                 {this.state.loaded
-                    ? 
-                    <table className="torrents">
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Name</th>
-                            <th>Download</th>
-                            <th>Date</th>
-                            <th>Size</th>
-                            <th><i className="fas fa-arrow-up"></i></th>
-                            <th><i className="fas fa-arrow-down"></i></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {this.state.torrents.map((torrent, key) => {
-                            return <tr className="torrent" key={key}>
-                            <td className="type"><i className={this.type[torrent.category]}></i></td>
-                                <td className="name">{torrent
-                                        .name
-                                        .substring(0, torrent.name.lastIndexOf('.')) || torrent.name}</td>
-                                <td className="downloadBTN"><button onClick={(e) => {this.downloadTorrent(e, torrent.fileName)}} className="fas fa-download downloadBTN"><i ></i></button></td>
-                                <td className="date">{(new Date(torrent.timestamp)).getDate()}/{(new Date(torrent.timestamp)).getMonth()}/{(new Date(torrent.timestamp)).getFullYear()}</td>
-                                <td className="size">{bytesToSize(torrent.length)}</td>
-                                <td></td>
-                                <td></td>
-                            </tr>;
-                        })}
-                        </tbody>
-                    </table>
+                    ? <table className="torrents">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                    <th>Download</th>
+                                    <th>Date</th>
+                                    <th>Size</th>
+                                    <th>
+                                        <i className="fas fa-arrow-up"></i>
+                                    </th>
+                                    <th>
+                                        <i className="fas fa-arrow-down"></i>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this
+                                    .state
+                                    .torrents
+                                    .map((torrent, key) => {
+                                        return <tr className="torrent" key={key}>
+                                            <td className="type">
+                                                <i className={this.type[torrent.category]}></i>
+                                            </td>
+                                            <td className="name">{torrent
+                                                    .name
+                                                    .substring(0, torrent.name.lastIndexOf('.')) || torrent.name}</td>
+                                            <td className="downloadBTN">
+                                                <button
+                                                    onClick={(e) => {
+                                                    this.downloadTorrent(e, torrent.fileName)
+                                                }}
+                                                    className="fas fa-download downloadBTN">
+                                                    <i ></i>
+                                                </button>
+                                            </td>
+                                            <td className="date">{(new Date(torrent.timestamp)).getDate()}/{(new Date(torrent.timestamp)).getMonth()}/{(new Date(torrent.timestamp)).getFullYear()}</td>
+                                            <td className="size">{bytesToSize(torrent.length)}</td>
+                                            <td>{torrent.up}</td>
+                                            <td>{torrent.down}</td>
+                                        </tr>;
+                                    })}
+                            </tbody>
+                        </table>
                     : null}
             </div>
         );
