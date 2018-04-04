@@ -1,3 +1,41 @@
 .Main {
     background: linear-gradient(to right, #0D7BE4, #0e80b0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.torrents {
+    width: 90%;
+}
+
+tr {
+    border-radius: 10px;
+}
+
+td {
+    border: black solid 1px;
+    padding: 10px;
+    margin: 3px;
+    color: whitesmoke;
+}
+
+table {
+    border-collapse: separate;
+}
+
+.type,
+.date,
+.size,
+.downloadBTN {
+    text-align: center;
+}
+
+.downloadBTN {
+    background-color: transparent;
+}
+
+.downloadBTN>button {
+    border: none;
 }

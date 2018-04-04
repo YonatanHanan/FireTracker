@@ -26,6 +26,14 @@ class TorrentForm extends Component {
             .trailerChanged
             .bind(this);
 
+        this.igdbChanged = this
+            .igdbChanged
+            .bind(this);
+
+        this.posterChanged = this
+            .posterChanged
+            .bind(this);
+
         this.descriptionChanged = this
             .descriptionChanged
             .bind(this);
@@ -38,12 +46,22 @@ class TorrentForm extends Component {
             isMiscellaneous: false,
             imdbTitle: "",
             description: "",
-            trailer: ""
+            trailer: "",
+            igdb: "",
+            poster: ""
         };
     }
 
     imdbTitleChanged(e) {
         this.setState({imdbTitle: e.target.value});
+    }
+
+    igdbChanged(e) {
+        this.setState({igdb: e.target.value});
+    }
+
+    posterChanged(e) {
+        this.setState({poster: e.target.value});
     }
 
     trailerChanged(e) {
@@ -167,7 +185,20 @@ class TorrentForm extends Component {
                                         id="IGDB"
                                         type="text"
                                         className="pure-input-1-3"
-                                        placeholder="Start typing"/>
+                                        placeholder="Start typing"
+                                        onChange={this.igdbChanged}/>
+                                </div>
+                            : null}
+
+                        {this.state.isMiscellaneous
+                            ? <div className="pure-control-group">
+                                    <label htmlFor="Poster">Poster</label>
+                                    <input
+                                        id="Poster"
+                                        type="url"
+                                        className="pure-input-1-3"
+                                        placeholder="Enter poster image link"
+                                        onChange={this.posterChanged}/>
                                 </div>
                             : null}
 

@@ -33,6 +33,22 @@ class Upload extends Component {
             .bind(this);
     }
 
+    hash = (s) => {
+        /* Simple hash function. */
+        var a = 1, c = 0, h, o;
+        if (s) {
+            a = 0;
+            /*jshint plusplus:false bitwise:false*/
+            for (h = s.length - 1; h >= 0; h--) {
+                o = s.charCodeAt(h);
+                a = (a<<6&268435455) + o + (o<<14);
+                c = a & 266338304;
+                a = c!==0?a^c>>21:a;
+            }
+        }
+        return String(a);
+    }
+
     handleUploadStart = () => {
         console.log("handleUploadStart");
     }
@@ -46,8 +62,14 @@ class Upload extends Component {
 
     handleUploadSuccess = (filename) => {
         console.log(filename);
-        this.setState({filename: filename});
+        //this.setState({filename: filename});
     }
+
+    newFileName = (filename) => {
+        this.setState({filename: filename});
+        return this.hash(Date.now() + " " + filename);
+    }
+
     render() {
         return (
             <div className="Upload">
@@ -66,7 +88,7 @@ class Upload extends Component {
                             hidden
                             accept="application/x-bittorrent"
                             name="torrentFile"
-                            filename={file => Date.now() + " " + file.name}
+                            filename={file => this.newFileName(file.name)}
                             storageRef={fire
                             .storage()
                             .ref('torrents')}

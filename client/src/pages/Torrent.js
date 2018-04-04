@@ -3,6 +3,7 @@ import '../css/Torrent.css';
 import {fire, storage} from '../firebase.js';
 
 import MovieShow from '../components/MovieShow';
+import Miscellaneous from '../components/Miscellaneous';
 class Torrent extends Component {
 
     constructor(props) {
@@ -26,6 +27,12 @@ class Torrent extends Component {
 
         torrentRef.on('value', (snapshot) => {
             let torrent = snapshot.val();
+            if(!torrent){
+                this
+                .props
+                .history
+                .push('/');
+            }
             console.log(torrent);
             this.setState({torrent: torrent, loaded: true});
         }).bind(this);
@@ -57,8 +64,9 @@ class Torrent extends Component {
                             {this.state.torrent.isMovieOrShow
                                 ? <MovieShow data={this.state.torrent}/>
                                 : null}
-                            {this.state.torrent.isMovieOrShow || this.state.torrent.isGame
-                                ? <MovieShow data={this.state.torrent}/>
+
+                            {this.state.torrent.isMiscellaneous
+                                ? <Miscellaneous data={this.state.torrent}/>
                                 : null}
                         </div>
                     : null}

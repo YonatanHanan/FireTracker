@@ -12,6 +12,38 @@ var request = require('request');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
+exports.updatePeers = functions
+    .database
+    .ref('/clients/{info_hash}/{peer_id}')
+    .onUpdate((change, context) => {
+        const TEN_MINUTES = 600000;
+        Promise.all([
+            admin
+                .database()
+                .ref(`/clients/${change.params.info_hash}/`)
+                .once("value")
+            ])
+            .then(function (values) {
+                let data = values[0].val();
+
+                Object
+                    .keys(data)
+                    .forEach(function (key) {
+                        if(Date.now() - data[key].lastUpdated > TEN_MINUTES){
+                            let removeClient = admin.database().ref(`/clients/${change.params.info_hash}/${key}`).remove();
+                            let removePeer = admin.database().ref(`torrents/${change.params.info_hash}/clients/${key}`).remove();
+                            Promise.all([removeClient, removePeer]).then(function(values) {
+                                return console.log("delete", key);
+                            });
+                        }else{
+                            console.log("save", key);
+                        }
+                    });
+
+                return console.log("All Done");
+            });
+    });
+
 exports.announce = functions
     .https
     .onRequest((req, res) => {
@@ -20,27 +52,47 @@ exports.announce = functions
             res.send("Nice Joke");
             return;
         } else {
-            const info_hash = hashy(req.query.info_hash).toLowerCase();
-            const peer_id = hashy(req.query.peer_id).toLowerCase();
+            const TWO_MINUTES = 120;
+            const INFO_HASH = hashy(req.query.info_hash).toLowerCase();
+            const PEER_ID = hashy(req.query.peer_id).toLowerCase();
 
-            let torrentKey = `/clients/${info_hash}/`;
-            let key = `/clients/${info_hash}/${peer_id}`;
+            let torrentKey = `/clients/${INFO_HASH}/`;
+            let key = `/clients/${INFO_HASH}/${PEER_ID}`;
+            let torrentFileKey = `torrents/${INFO_HASH}/clients/`;
 
             const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket
                 ? req.connection.socket.remoteAddress
                 : null);
 
             req.query["ip"] = ip;
+            req.query["lastUpdated"] = Date.now();
+
+            let client = {};
+            client[PEER_ID] = "";
+
+            if (parseInt(req.query.left) === 0) {
+                client[PEER_ID] = "Seeder";
+            } else {
+                client[PEER_ID] = "Downloader";
+            }
+
+            if(req.query.event === "stopped"){
+                client[PEER_ID] = "stopped";
+            }
 
             Promise.all([
                 admin
                     .database()
                     .ref(torrentKey)
                     .once("value"),
+                admin
+                    .database()
+                    .ref(key)
+                    .update(req.query),
                     admin
                         .database()
-                        .ref(key)
-                        .update(req.query)
+                        .ref(torrentFileKey)
+                        .update(client)
                 ])
                 .then(function (values) {
                     let data = values[0].val();
@@ -57,7 +109,7 @@ exports.announce = functions
                         });
 
                     let response = {
-                        'interval': 120,
+                        'interval': TWO_MINUTES,
                         'peers': clients
                     };
 
