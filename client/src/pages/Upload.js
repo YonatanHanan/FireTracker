@@ -27,49 +27,55 @@ class Upload extends Component {
             .startAt(Date.now())
             .on('child_added', (snapshot) => {
                 let torrent = snapshot.val();
-                console.log(torrent);
-                this.setState({torrent: torrent, uploaded: true});
+                if (torrent.fileName.split(".")[0] === this.state.filename) {
+                    this.setState({torrent: torrent, uploaded: true});
+                }
             })
             .bind(this);
     }
 
     hash = (s) => {
         /* Simple hash function. */
-        var a = 1, c = 0, h, o;
+        var a = 1,
+            c = 0,
+            h,
+            o;
         if (s) {
             a = 0;
             /*jshint plusplus:false bitwise:false*/
             for (h = s.length - 1; h >= 0; h--) {
                 o = s.charCodeAt(h);
-                a = (a<<6&268435455) + o + (o<<14);
+                a = (a << 6 & 268435455) + o + (o << 14);
                 c = a & 266338304;
-                a = c!==0?a^c>>21:a;
+                a = c !== 0
+                    ? a ^ c >> 21
+                    : a;
             }
         }
         return String(a);
     }
 
     handleUploadStart = () => {
-        console.log("handleUploadStart");
+        //console.log("handleUploadStart");
     }
 
     handleProgress = (progress) => {
-        console.log("handleProgress", progress);
+        //console.log("handleProgress", progress);
     }
     handleUploadError = (error) => {
-        console.error(error);
+        //console.error(error);
     }
 
     handleUploadSuccess = (filename) => {
-        console.log(filename);
+        //console.log(filename);
         //this.setState({filename: filename});
     }
 
     newFileName = (filename) => {
-        this.setState({filename: filename});
-        return this.hash(Date.now() + " " + filename);
+        const newName = this.hash(Date.now() + " " + filename);
+        this.setState({filename: newName});
+        return newName;
     }
-
     render() {
         return (
             <div className="Upload">

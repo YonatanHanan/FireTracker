@@ -38,6 +38,10 @@ class TorrentForm extends Component {
             .descriptionChanged
             .bind(this);
 
+        this.discogsChanged = this
+            .discogsChanged
+            .bind(this);
+
         this.state = {
             category: "Movie",
             isMovieOrShow: true,
@@ -48,7 +52,9 @@ class TorrentForm extends Component {
             description: "",
             trailer: "",
             igdb: "",
-            poster: ""
+            poster: "",
+            saved: false,
+            discogsID: ""
         };
     }
 
@@ -68,38 +74,65 @@ class TorrentForm extends Component {
         this.setState({trailer: e.target.value});
     }
 
+    discogsChanged(e) {
+        this.setState({discogsID: e.target.value});
+    }
+
     descriptionChanged(e) {
         this.setState({description: e.target.value});
     }
 
+    componentWillUnmount() {
+        if (!this.state.saved) {
+            fire
+                .database()
+                .ref('torrents/' + this.props.torrent.infoHash)
+                .remove();
+        }
+    }
+
     saveTorrent(e) {
         e.preventDefault();
-        if (this.state.isMovieOrShow) {
+        let url = "";
+        
+        if(this.state.isMovieOrShow){
+            url = `http://www.omdbapi.com/?i=${this.state.imdbTitle}&apikey=5424b8d1`;
+        }
+        else if(this.state.isMusic){
+            url = `https://api.discogs.com/releases/${this.state.discogsID}`;
+        }
+
+        if (url !== "") {
+            console.log("getting data");
             axios
-                .get('http://www.omdbapi.com/?i=' + this.state.imdbTitle + '&apikey=5424b8d1')
+                .get(url)
                 .then(response => {
                     console.log(response.data);
                     this.setState({apiData: response.data, loaded: true});
                     fire
                         .database()
                         .ref('torrents/' + this.props.torrent.infoHash)
-                        .update(this.state);
-                    console.log("Saved");
-                    this
-                        .props
-                        .history
-                        .push('/torrent/' + this.props.torrent.infoHash);
+                        .update(this.state)
+                        .then(() => {
+                            this.setState({saved: true});
+                            this
+                                .props
+                                .history
+                                .push('/torrent/' + this.props.torrent.infoHash);
+                        });
                 });
         } else {
             fire
                 .database()
                 .ref('torrents/' + this.props.torrent.infoHash)
-                .update(this.state);
-            console.log("Saved");
-            this
-                .props
-                .history
-                .push('/torrent/' + this.props.torrent.infoHash);
+                .update(this.state)
+                .then(() => {
+                    this.setState({saved: true});
+                    this
+                        .props
+                        .history
+                        .push('/torrent/' + this.props.torrent.infoHash)
+                });
         }
     }
 
@@ -172,7 +205,7 @@ class TorrentForm extends Component {
                                             id="Trailer"
                                             type="text"
                                             className="pure-input-1-3"
-                                            placeholder="Enter YouTube trailer link"
+                                            placeholder="Enter YouTube trailer link https://www.youtube.com/watch?v=89OP78l9oF0"
                                             onChange={this.trailerChanged}/>
                                     </div>
                                 </div>
@@ -187,6 +220,30 @@ class TorrentForm extends Component {
                                         className="pure-input-1-3"
                                         placeholder="Start typing"
                                         onChange={this.igdbChanged}/>
+                                </div>
+                            : null}
+
+                        {this.state.isMusic
+                            ? <div>
+                                    <div className="pure-control-group">
+                                        <label htmlFor="Poster">Poster</label>
+                                        <input
+                                            id="Poster"
+                                            type="url"
+                                            className="pure-input-1-3"
+                                            placeholder="Enter poster image link"
+                                            onChange={this.posterChanged}/>
+                                    </div>
+                                    <div className="pure-control-group">
+                                        <div className="discogsExplain">Enter Discogs Release ID for example
+                                            "https://www.discogs.com/Various-Classic-Disco/master/<b>1342601</b>"<input
+                                            id="discogs"
+                                            type="text"
+                                            className="pure-input-1-3"
+                                            placeholder="1342601"
+                                            onChange={this.discogsChanged}/></div>
+
+                                    </div>
                                 </div>
                             : null}
 

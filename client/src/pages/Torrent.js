@@ -4,6 +4,7 @@ import {fire, storage} from '../firebase.js';
 
 import MovieShow from '../components/MovieShow';
 import Miscellaneous from '../components/Miscellaneous';
+import Music from '../components/Music';
 class Torrent extends Component {
 
     constructor(props) {
@@ -26,6 +27,7 @@ class Torrent extends Component {
             .ref('torrents/' + window.location.pathname.split("/")[2]);
 
         torrentRef.on('value', (snapshot) => {
+            this.setState({loaded: false});
             let torrent = snapshot.val();
             if (!torrent) {
                 this
@@ -33,11 +35,9 @@ class Torrent extends Component {
                     .history
                     .push('/');
             }
-            console.log(torrent);
-
             let up = 0;
             let down = 0;
-            if (torrent.clients) {
+            if (torrent.hasOwnProperty("clients")) {
                 Object
                     .values(torrent.clients)
                     .forEach(peer => {
@@ -86,6 +86,10 @@ class Torrent extends Component {
 
                             {this.state.torrent.isMiscellaneous
                                 ? <Miscellaneous data={this.state.torrent}/>
+                                : null}
+
+                            {this.state.torrent.isMusic
+                                ? <Music data={this.state.torrent}/>
                                 : null}
                         </div>
                     : null}

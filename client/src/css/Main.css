@@ -42,14 +42,29 @@ table {
     border: none;
 }
 
+.torrentLink {
+    color: white;
+    font-style: normal;
+    text-decoration: none;
+}
+
+.torrentLink:visited {
+    color: white;
+    text-decoration: none;
+}
+
+.torrentLink:hover {
+    color: #cbbfbf;
+}
+
 .seeders-newPeer,
 .leechers-newPeer {
     text-align: center;
-    animation-name: example;
+    animation-name: glow;
     animation-duration: 1s;
 }
 
-@keyframes example {
+@keyframes glow {
     0% {
         text-shadow: transparent;
         font-weight: inherit;

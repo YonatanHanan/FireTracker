@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import update from 'immutability-helper';
+import {Link} from 'react-router-dom';
 import '../css/Main.css';
 import {fire, storage} from '../firebase.js';
 
@@ -60,14 +60,17 @@ class Main extends Component {
             }
             peers.up = up;
             peers.down = down;
-
-            console.log(peers);
             return peers;
         };
 
         let torrentRef = fire
             .database()
             .ref('torrents/');
+
+        torrentRef.on("child_added", function (snapshot, prevChildKey) {
+            var newPost = snapshot.val();
+            console.log(newPost.timestamp);
+        });
 
         torrentRef.on('child_changed', (snapshot) => {
             let newValue = snapshot.val();
@@ -87,16 +90,18 @@ class Main extends Component {
                     }
                     return "";
                 });
-            this.setState({torrents: torrents});
+            this.setState({torrents: torrents, loaded: true});
 
             setTimeout(function () {
-                console.log(changedKey);
-                this.state.torrents[changedKey].changed = '';
-                this.forceUpdate();
+                var stateCopy = Object.assign({}, this.state);
+                if ((stateCopy.length > 0) && (stateCopy.torrents[changedKey].hasOwnProperty("description"))) { // not done uploading
+                    stateCopy.torrents[changedKey].changed = "";
+                }
+                this.setState(stateCopy);
             }.bind(this), 2100);
         });
 
-        torrentRef.once('value', (snapshot) => {
+        torrentRef.orderByChild('timestamp').once('value', (snapshot) => {
             let torrentsObj = snapshot.val();
             let torrents = [];
             Object
@@ -104,8 +109,12 @@ class Main extends Component {
                 .forEach(function (key) {
                     torrentsObj[key]["peers"] = returnPeers(torrentsObj[key].clients);
                     torrentsObj[key]["changed"] = "";
-                    torrents.push(torrentsObj[key]);
+                    if (torrentsObj[key].hasOwnProperty("description")) {
+                        torrents.push(torrentsObj[key]);
+                    }
                 });
+            
+            torrents.sort(function(a, b){return a.timestamp - b.timestamp}).reverse();
             this.setState({torrents: torrents, loaded: true});
         });
     }
@@ -140,9 +149,12 @@ class Main extends Component {
                                             <td className="type">
                                                 <i className={this.type[torrent.category]}></i>
                                             </td>
-                                            <td className="name">{torrent
-                                                    .name
-                                                    .substring(0, torrent.name.lastIndexOf('.')) || torrent.name}</td>
+                                            <td className="name">
+                                                <Link to={`torrent/${torrent.infoHash}`} className="torrentLink">
+                                                    {torrent
+                                                        .name
+                                                        .substring(0, torrent.name.lastIndexOf('.')) || torrent.name}</Link>
+                                            </td>
                                             <td className="downloadBTN">
                                                 <button
                                                     onClick={(e) => {
