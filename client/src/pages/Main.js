@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import update from 'immutability-helper';
 import '../css/Main.css';
 import {fire, storage} from '../firebase.js';
 
@@ -9,7 +10,7 @@ class Main extends Component {
         super(props);
 
         this.state = {
-            torrents: {},
+            torrents: [],
             loaded: false
         };
 
@@ -39,45 +40,76 @@ class Main extends Component {
                 console.log(error);
             });
     }
+
     componentDidMount() {
+
+        function returnPeers(newPeers) {
+            let peers = {};
+            let up = 0;
+            let down = 0;
+            if (newPeers) {
+                Object
+                    .values(newPeers)
+                    .forEach(peer => {
+                        if (peer === "Seeder") {
+                            up++;
+                        } else if (peer === "Downloader") {
+                            down++;
+                        }
+                    });
+            }
+            peers.up = up;
+            peers.down = down;
+
+            console.log(peers);
+            return peers;
+        };
+
         let torrentRef = fire
             .database()
             .ref('torrents/');
 
-        torrentRef.on('value', (snapshot) => {
+        torrentRef.on('child_changed', (snapshot) => {
+            let newValue = snapshot.val();
+            let torrents = this.state.torrents;
+            let newTorrent = {};
+            let changedKey = 0;
+            this
+                .state
+                .torrents
+                .map((torrent, key) => {
+                    if (torrent.infoHash === newValue.infoHash) {
+                        changedKey = key;
+                        newTorrent = newValue;
+                        newTorrent["peers"] = returnPeers(newValue.clients);
+                        newTorrent["changed"] = "-newPeer";
+                        torrents[key] = newTorrent;
+                    }
+                    return "";
+                });
+            this.setState({torrents: torrents});
+
+            setTimeout(function () {
+                console.log(changedKey);
+                this.state.torrents[changedKey].changed = '';
+                this.forceUpdate();
+            }.bind(this), 2100);
+        });
+
+        torrentRef.once('value', (snapshot) => {
             let torrentsObj = snapshot.val();
             let torrents = [];
-
             Object
                 .keys(torrentsObj)
                 .forEach(function (key) {
-                    let down = 0;
-                    let up = 0;
-                    if (torrentsObj[key].clients) {
-                        Object
-                            .values(torrentsObj[key].clients)
-                            .forEach(peer => {
-                                if (peer === "Seeder") {
-                                    up++;
-                                } else if (peer === "Downloader") {
-                                    down++;
-                                }
-                            });
-                        torrentsObj[key]["up"] = up;
-                        torrentsObj[key]["down"] = down;
-                    }else{
-                        torrentsObj[key]["up"] = 0;
-                        torrentsObj[key]["down"] = 0;
-                    }
-
+                    torrentsObj[key]["peers"] = returnPeers(torrentsObj[key].clients);
+                    torrentsObj[key]["changed"] = "";
                     torrents.push(torrentsObj[key]);
                 });
-
             this.setState({torrents: torrents, loaded: true});
-
-        }).bind(this);
-
+        });
     }
+
     render() {
         return (
             <div className="Main">
@@ -122,8 +154,8 @@ class Main extends Component {
                                             </td>
                                             <td className="date">{(new Date(torrent.timestamp)).getDate()}/{(new Date(torrent.timestamp)).getMonth()}/{(new Date(torrent.timestamp)).getFullYear()}</td>
                                             <td className="size">{bytesToSize(torrent.length)}</td>
-                                            <td>{torrent.up}</td>
-                                            <td>{torrent.down}</td>
+                                            <td className={`seeders${torrent.changed}`}>{torrent.peers.up}</td>
+                                            <td className={`leechers${torrent.changed}`}>{torrent.peers.down}</td>
                                         </tr>;
                                     })}
                             </tbody>

@@ -27,13 +27,32 @@ class Torrent extends Component {
 
         torrentRef.on('value', (snapshot) => {
             let torrent = snapshot.val();
-            if(!torrent){
+            if (!torrent) {
                 this
-                .props
-                .history
-                .push('/');
+                    .props
+                    .history
+                    .push('/');
             }
             console.log(torrent);
+
+            let up = 0;
+            let down = 0;
+            if (torrent.clients) {
+                Object
+                    .values(torrent.clients)
+                    .forEach(peer => {
+                        if (peer === "Seeder") {
+                            up++;
+                        } else if (peer === "Downloader") {
+                            down++;
+                        }
+                    });
+                torrent["up"] = up;
+                torrent["down"] = down;
+            } else {
+                torrent["up"] = 0;
+                torrent["down"] = 0;
+            }
             this.setState({torrent: torrent, loaded: true});
         }).bind(this);
 

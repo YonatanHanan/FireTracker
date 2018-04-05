@@ -33,21 +33,6 @@ class Miscellaneous extends Component {
             });
     }
 
-    componentDidMount() {
-        let up = 0;
-        let down = 0;
-        Object
-            .values(this.props.data.clients)
-            .forEach(peer => {
-                if (peer === "Seeder") {
-                    up++;
-                } else if (peer === "Downloader") {
-                    down++;
-                }
-            });
-            this.setState({up : up, down : down});
-    }
-
     render() {
         return (
             <div className="Miscellaneous">
@@ -73,10 +58,10 @@ class Miscellaneous extends Component {
                             </ul>
                             <ul>
                                 <li>
-                                <i className="fas fa-arrow-up"></i> {this.state.up}
+                                <i className="fas fa-arrow-up"></i> {this.props.data.up}
                                 </li>
                                 <li>
-                                <i className="fas fa-arrow-down"></i> {this.state.down}
+                                <i className="fas fa-arrow-down"></i> {this.props.data.down}
                                 </li>
                             </ul>
                         </div>

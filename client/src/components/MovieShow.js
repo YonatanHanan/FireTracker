@@ -49,6 +49,24 @@ class MovieShow extends Component {
                             alt={this.props.data.apiData.Title}
                             className="poster"/>
                         <button onClick={this.downloadTorrent} className="download">DOWNLOAD {bytesToSize(this.props.data.length)}</button>
+                        <div className="peers">
+                            <ul>
+                                <li>
+                                    Seeders
+                                </li>
+                                <li>
+                                    Leechers 
+                                </li>
+                            </ul>
+                            <ul>
+                                <li>
+                                <i className="fas fa-arrow-up"></i> {this.props.data.up}
+                                </li>
+                                <li>
+                                <i className="fas fa-arrow-down"></i> {this.props.data.down}
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                     <div className="plot">
                         <Info data={this.props.data}/>

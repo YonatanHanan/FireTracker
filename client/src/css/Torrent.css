@@ -15,3 +15,13 @@
     border: none;
     font-weight: bold;
 }
+
+.peers>ul {
+    padding-left: 0;
+    padding-right: 5px;
+}
+
+.peers>ul>li {
+    list-style: none;
+    padding-bottom: 10px;
+}

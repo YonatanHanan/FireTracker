@@ -28,7 +28,9 @@ table {
 .type,
 .date,
 .size,
-.downloadBTN {
+.downloadBTN,
+.seeders,
+.leechers {
     text-align: center;
 }
 
@@ -38,4 +40,26 @@ table {
 
 .downloadBTN>button {
     border: none;
+}
+
+.seeders-newPeer,
+.leechers-newPeer {
+    text-align: center;
+    animation-name: example;
+    animation-duration: 1s;
+}
+
+@keyframes example {
+    0% {
+        text-shadow: transparent;
+        font-weight: inherit;
+    }
+    20% {
+        text-shadow: 1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue;
+        font-weight: bold;
+    }
+    100% {
+        text-shadow: transparent;
+        font-weight: inherit;
+    }
 }
