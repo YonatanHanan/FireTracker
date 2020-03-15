@@ -11,7 +11,8 @@ class Main extends Component {
 
         this.state = {
             torrents: [],
-            loaded: false
+            loaded: false,
+            now : Date.now()
         };
 
         this.type = {
@@ -42,7 +43,6 @@ class Main extends Component {
     }
 
     componentDidMount() {
-
         function returnPeers(newPeers) {
             let peers = {};
             let up = 0;
@@ -67,16 +67,21 @@ class Main extends Component {
             .database()
             .ref('torrents/');
 
-        torrentRef.on("child_added", function (snapshot, prevChildKey) {
-            var newPost = snapshot.val();
-            console.log(newPost.timestamp);
-        });
-
         torrentRef.on('child_changed', (snapshot) => {
             let newValue = snapshot.val();
             let torrents = this.state.torrents;
             let newTorrent = {};
             let changedKey = 0;
+
+            if(newValue.timestamp > this.state.now){
+                let torrents = this.state.torrents;
+                newValue["peers"] = this.returnPeers(newValue.clients);
+                newValue["changed"] = "";
+                torrents.unshift(newValue);
+                this.setState({torrents: torrents});
+                return;
+            }
+
             this
                 .state
                 .torrents
@@ -94,29 +99,33 @@ class Main extends Component {
 
             setTimeout(function () {
                 var stateCopy = Object.assign({}, this.state);
-                if ((stateCopy.length > 0) && (stateCopy.torrents[changedKey].hasOwnProperty("description"))) { // not done uploading
+                if ((stateCopy.torrents[changedKey].hasOwnProperty("description"))) { // not done uploading
                     stateCopy.torrents[changedKey].changed = "";
                 }
                 this.setState(stateCopy);
-            }.bind(this), 2100);
+            }.bind(this), 3100);
         });
 
-        torrentRef.orderByChild('timestamp').once('value', (snapshot) => {
-            let torrentsObj = snapshot.val();
-            let torrents = [];
-            Object
-                .keys(torrentsObj)
-                .forEach(function (key) {
-                    torrentsObj[key]["peers"] = returnPeers(torrentsObj[key].clients);
-                    torrentsObj[key]["changed"] = "";
-                    if (torrentsObj[key].hasOwnProperty("description")) {
-                        torrents.push(torrentsObj[key]);
-                    }
-                });
-            
-            torrents.sort(function(a, b){return a.timestamp - b.timestamp}).reverse();
-            this.setState({torrents: torrents, loaded: true});
-        });
+        torrentRef
+            .orderByChild('timestamp')
+            .once('value', (snapshot) => {
+                let torrentsObj = snapshot.val();
+                let torrents = [];
+                Object
+                    .keys(torrentsObj)
+                    .forEach(function (key) {
+                        torrentsObj[key]["peers"] = returnPeers(torrentsObj[key].clients);
+                        torrentsObj[key]["changed"] = "";
+                        if (torrentsObj[key].hasOwnProperty("description")) {
+                            torrents.push(torrentsObj[key]);
+                        }
+                    });
+
+                torrents.sort(function (a, b) {
+                    return a.timestamp - b.timestamp
+                }).reverse();
+                this.setState({torrents: torrents, loaded: true});
+            });
     }
 
     render() {

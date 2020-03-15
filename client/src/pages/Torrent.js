@@ -29,11 +29,13 @@ class Torrent extends Component {
         torrentRef.on('value', (snapshot) => {
             this.setState({loaded: false});
             let torrent = snapshot.val();
-            if (!torrent) {
+            console.log(!torrent || torrent == null);
+            if (!torrent || torrent == null) {
                 this
                     .props
                     .history
                     .push('/');
+                    return;
             }
             let up = 0;
             let down = 0;
